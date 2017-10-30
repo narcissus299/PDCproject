@@ -17,10 +17,33 @@ class pynnmp:
 		return self.sigmoid(z) * (1-self.sigmoid(z))
 
 	def feed_forward(self,x):
-		pass
+		for w,b in zip(self.weights,self.bias):
+			x = self.sigmoid( w.T.dot(x) + b)
+		return x
 
 	def gradient_descent(self,training_data,training_label, minibatch_size, epochs, learning_rate, test_data, test_label):
-		pass
+
+		for i in range(epochs):
+			train = zip(training_data,training_label)
+			random.shuffle(train)
+			mini_batches = [ train[k:k+minibatch_size] for k in xrange(0, len(train),minibatch_size)]
+
+			for mini_batch in mini_batches:
+				self.update_batch(mini_batch,learning_rate)
+
+
+	def update_batch(self,mini_batch,learning_rate):
+
+		dw = [np.zeros(w.shape) for w in self.weights ]
+		db = [np.zeros(b.shape) for b in self.bias ]
+
+		for batch in p.iterate(mini_batch):			
+			w_error, b_error = self.back_prop(batch)
+				dw = [current_dw+w_change for current_dw,w_change in zip(dw,w_error)]
+				db = [current_db+b_change for current_db,b_change in zip(db,b_error)]
+
+		self.weights = [w - (learning_rate*change_w/len(mini_batch)) for w,change_w in zip(self.weights,dw)]
+		self.bias = [b - (learning_rate*change_b/len(mini_batch)) for b,change_b in zip(self.bias,db)]
 
 	def back_prop(self, batch):
 
@@ -56,13 +79,13 @@ class pynnmp:
 
 
 	def d_cost(self,output,label):
-		pass
+		return np.subtract(output, label)
 
 	def loss(self,output,label):
-		pass
+		return 0.5 * ( np.subtract(label, output) ** 2 )
 
-	def train(self,data,label, minibatch_size, epochs, learning_rate ,test_data,test_label):
-		pass
+	def train(self,data,label, minibatch_size = 15, epochs= 1000, learning_rate= 10,test_data=None,test_label=None):
+		self.gradient_descent(data,label,minibatch_size,epochs,learning_rate,test_data,test_label)
 
 	def predict(self,data):
 		return self.feed_forward(data)

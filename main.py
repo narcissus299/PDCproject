@@ -4,6 +4,18 @@ import matplotlib.pyplot as plt
 from sklearn import datasets
 import numpy as np
 
+def displayDigits(image,label=None):
+	plt.imshow(image.reshape(8,8), cmap=plt.cm.gray_r, interpolation='nearest')
+	if label: plt.title(label)
+
+def convertToVec(label):
+	vec = np.zeros(10)
+	vec[label] = 1.0
+	return np.reshape(vec,(10,1))
+
+def converToLabel(vec):
+	return np.argmax(vec.T)
+
 digits = datasets.load_digits()
 images,labels = digits.images, digits.target
 
