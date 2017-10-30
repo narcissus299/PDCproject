@@ -1,0 +1,7 @@
+# PDCproject
+This package brings OpenMP-like functionality to Python. It takes the good qualities of OpenMP such as minimal code changes and high efficiency and combines them with the Python Zen of code clarity and ease-of-use.
+
+Neural Networks are powerful tools that power most of today's machine learning and are extensively used. However they can be extremely slow to train and thus can be difficult to deploy with great accuracy since traditional hardware isn't powerful enough to train large networks. This projects aims to optimise the training by optimising vectorization and the back propagation algorithm. It is supposed to speed up the training on traditional CPUs.
+
+When entering a parallel context, processes are forked as necessary. That means that child processes are started, which are in (nearly) exactly the same state as the creating process. The memory is not copied, but referenced. Only when a process writes into a part of the memory it gets its own copy of the corresponding memory region. This keeps the processing overhead low (but of course not as low as for OpenMP threads).
+Once the parallel region is left, child processes exit and only the original process 'survives'. The 'shared' datastructures from the corresponding submodule are synchronized either via shared memory or using a manager process and the pickle protocol (see the documentation of the multiprocessing module for more information).
