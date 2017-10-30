@@ -31,16 +31,28 @@ class pynnmp:
 			for mini_batch in mini_batches:
 				self.update_batch(mini_batch,learning_rate)
 
+			'''Printing information (loss) about the current epoch'''
+			if i%50==0: print("Epoch "+str(i)+"/"+str(epochs))
+
+			if test_data and test_label:
+				total_loss = np.zeros(self.bias[-1].shape)
+				for data,lab in zip(test_data,test_label):
+					prediction = self.predict(data)
+					inv_loss = self.loss(prediction,lab)
+					total_loss = np.add(total_loss,inv_loss)
+				print np.mean(total_loss)
 
 	def update_batch(self,mini_batch,learning_rate):
 
-		dw = [np.zeros(w.shape) for w in self.weights ]
-		db = [np.zeros(b.shape) for b in self.bias ]
+		dw = pymp.shared.list([np.zeros(w.shape) for w in self.weights ])
+		db = pymp.shared.list([np.zeros(b.shape) for b in self.bias ])
 
-		for batch in p.iterate(mini_batch):			
-			w_error, b_error = self.back_prop(batch)
-				dw = [current_dw+w_change for current_dw,w_change in zip(dw,w_error)]
-				db = [current_db+b_change for current_db,b_change in zip(db,b_error)]
+		with pymp.Parallel(4) as p:
+			for batch in p.iterate(mini_batch):			
+				w_error, b_error = self.back_prop(batch)
+				with p.lock:
+					dw = [current_dw+w_change for current_dw,w_change in zip(dw,w_error)]
+					db = [current_db+b_change for current_db,b_change in zip(db,b_error)]
 
 		self.weights = [w - (learning_rate*change_w/len(mini_batch)) for w,change_w in zip(self.weights,dw)]
 		self.bias = [b - (learning_rate*change_b/len(mini_batch)) for b,change_b in zip(self.bias,db)]
